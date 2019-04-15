@@ -1,0 +1,40 @@
+<html>
+    <head>
+        <title>Welcome to Book World</title>
+        <script type="text/javascript">
+            function OnSubmitForm(value){
+                if(value=='Login'){
+                    document.myform.action = "http://localhost:3000/login";
+                    document.myform.submit();
+                }else if(value == 'Signup'){
+                    document.myform.action = "http://localhost:3000/signup";
+                    document.myform.submit();
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <center>
+            <h1>Online Book Library</h1>
+            <h2>Enter your Credentials</h2>
+            <form action="http://localhost:3000" name= "myform" method="POST">
+                <table>
+                    <tr>
+                        <td>Username : </td>
+                        <td><input type="text" name="username" value=""/></td>
+                    </tr>
+                    <tr>
+                        <td>Password  : </td>
+                        <td><input type="password" name="password" value=""/></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><input type="button" onclick="OnSubmitForm(this.value);" value="Login"/>
+                            <input type="button" onclick="OnSubmitForm(this.value);" value="Signup"/>
+                        </td>
+                    </tr>
+                </table>
+            </form>   
+        </center>
+    </body>
+</html>
