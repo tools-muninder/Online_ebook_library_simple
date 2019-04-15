@@ -1,0 +1,23 @@
+[
+    {
+        "isbnNo":"87543",
+        "name": "Lets learn Node",
+        "imageUrl": "/node3.jpg",
+        "price":"Rs.550",
+        "ebookname":"node3.pdf"
+    },
+    {
+        "isbnNo":"75938",
+        "name": "Node-An open source JS platform",
+        "imageUrl": "/node2.jpg",
+        "price":"Rs.650",
+        "ebookname":"node2.pdf"
+    },
+     {
+        "isbnNo":"65421",
+        "name": "NodeJS for Beginners",
+        "imageUrl": "/node1.jpg",
+        "price":"Rs.550",
+        "ebookname":"node1.pdf"
+    }
+ ]

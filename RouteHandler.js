@@ -1,0 +1,242 @@
+var module = require('./dbmodule')
+var url = require('url')
+var querystring = require("querystring")
+var fs = require('fs')
+
+var rest = require('restler')
+
+var zlib = require('zlib')
+var net = require('net')
+
+message="";
+
+exports.display_login = function(url,request,response){
+    data1 = '';
+    request.on('data',function(chunk){
+        // console.log(chunk)
+        data1 += chunk;
+    });
+    request.on('end',function(){
+        qs = querystring.parse(data1);
+        // console.log(qs)
+        name = qs['username'];
+        password = qs['password'];
+
+        rest.post("http://localhost:8084/NodeBookService/resources/book/login",{ query:{"username":name,"password":password} } ).on('complete',function(result){
+            if(result instanceof Error){
+                response.end('Error',result.message);
+            }else{
+                if(result=="Valid User"){
+                    fs.appendFile('./log.txt',"User"+name+"has Logged in at"+new Date(),function(err,html){
+                        if(err){
+                            throw err;
+                        }
+                    });
+                response.writeHead(200,{"Content-Type":"text/html"});
+                fs.readFile("./Details_Book.html",function(err,html){
+                    if (err){throw err;}
+                    response.writeHeader(200,{"Content-Type":"text/html"});
+                    response.write(html);
+                    response.end();
+                });
+                }else{
+                    console.log("error");
+                    response.writeHead(200, {'Content-Type': 'text/html'});
+					response.write("<body bgcolor='#E2C2F6'><center>Invalid User try login Again!!</center></body>");
+					response.write("<center><a href='home'>Back to Login</a></center>");
+					response.end();
+                }
+            }
+        });
+        // module.authenticateUser(name,password,response,function(err,data){
+        //     if(data="success"){
+        //         response.writeHead(200,{"Content-Type":"text/html"});
+        //         fs.readFile('./Details_Book.html',function(err,html){
+        //             if(err){
+        //                 throw err;
+        //             }
+        //             response.writeHeader(200,{"Content-Type":"text/html"});
+        //             response.write(html);
+        //             response.end();
+        //         });
+        //     }else{
+        //         console.log("error");
+        //         response.writeHead(200,{"Content-Type":"text/html"});
+        //         response.write("<body bgcolor='#E2C2F6'><center>Invalid User try login Again!!</center></body>");
+        //         response.write("<center><a href ='home' Back to Login></a></center>")
+        //         response.end();
+        //     }
+        // });
+
+        // // result = module.authenticateUser(name,password);
+        // if(result == 'Valid'){
+        //     fs.appendFile('./log.txt',('User:'+name+'has logged in at'+new Date()),function(err,html){
+        //         if(err){
+        //             throw err;
+        //         }
+                
+        //     });
+        //     response.writeHead(200,{"Content-Type":"text/html"});
+        //     // fs.readFile('./Details_Book.html',function(err,html){
+        //     //     if(err){
+        //     //         throw err;
+        //     //     }
+        //     //     //console.log("i am in valid state"+html);
+        //     //     response.writeHead(200,{"Content-Type":"text/html"});
+        //     //     response.write(html);
+        //     //     response.end()
+        //     // });
+        // }else{
+        //     response.writeHead(200,{"Content-Type":"text/html"});
+        //     response.write("<body bgcolor='#E2C2F6'><center>Invalid User...Try again!!</center></body>");
+        //     response.write("<center><a href='home'>Back to Login</a></center>");
+        //     response.end();
+        // }
+    });
+}
+
+exports.display_signup = function(url,request,response){
+    fs.readFile('./Signup_Book.html',function(err,html){
+        if (err){
+            throw err;
+        }
+        response.writeHeader(200,{"Content-Type":"text/html"})
+        response.write(html);
+        response.end();
+    })
+}
+
+exports.display_register = function(url,request,response){
+    data1 = '';
+    request.on('data',function(chunk){
+        console.log(chunk);
+        data1 += chunk;
+    })
+    request.on('end',function(){
+        qs = querystring.parse(data1);
+        name = qs['username'];
+        password = qs['password'];
+        confirmpassword = qs['confirmpassword'];
+        address = qs['address'];
+        if (password == confirmpassword){
+            rest.post("http://localhost:8084/NodeBookService/resources/book/register",{query:{"username":name,"password":password,"address":address}}).on('complete',function(saved){
+                if(saved instanceof Error){
+                    console.log("Error message "+ saved.message);
+                    response.end('Error',saved.message);
+                }else{
+                    console.log("Saved:"+ saved);
+                    response.writeHeader(200, {"Content-Type": "text/html"}); 
+					response.write("<body bgcolor='#E2C2F6'><center>"+saved+"</center></body>");
+					response.write("<center><a href='home'>Click here to Login</a></center>");
+                }
+            });
+
+            // module.addUser(name,password,address,response,function(err,data){
+            //     if(data){
+            //         response.writeHeader(200,{"Content-Type":"text/html"});
+            //         response.write("<body bgcolor='#E2C2F6'><center>Registered successfully!!</center></body>");
+            //         response.write("<center><a href='home'>Click here to Login</a></center>");
+            //         response.end();
+            //     }
+            // });
+        }else{
+            response.writeHead(200, {'Content-Type': 'text/html'});
+			response.write("<body bgcolor='#E2C2F6'><center>Password does not match with confirm password!!</center></body>");
+            response.write("<center><a href='signup'>Try again</a></center>")
+            response.end();
+        }
+    });
+}
+
+exports.display_home = function(url,request,response){
+    fs.readFile('./Login_Book.html',function(err,html){
+        if (err){
+            throw err;
+        }
+        response.writeHead(200, {'Content-Type': 'text/html'});
+        response.write(html);
+        response.end();
+    });
+}
+
+exports.view_books = function(url,request,response){
+    fs.readFile('./books.json',function(err,json){
+        if (err){
+            throw err;
+        }
+        response.writeHead(200,{"Content-Type":"application/json"});
+        response.end(json);
+    });
+}
+
+exports.getImageResponse = function(url,request,response){      
+    var img;
+    switch(request.url){
+        case '/node1.jpg':
+            img = fs.readFileSync('./books/img/node1.jpg');
+            break;
+        case '/node2.jpg':  
+            img=fs.readFileSync('./books/img/node2.png');
+			break;
+        case '/node3.jpg':  
+            img=fs.readFileSync('./books/img/node3.jpg');
+			break;
+    }
+    response.writeHead(200,{"Content-Type":"image/jpg"});
+    response.end(img,'binary');
+}
+
+exports.download_book = function(request,response){
+    var query = url.parse(request.url).query; 
+    var ebook = querystring.parse(query)["ebook"];
+    rstream = fs.createReadStream("./books/"+ebook);
+    wstream = fs.createWriteStream("D:/"+ebook+".gz");
+    var gzip = zlib.createGzip();       
+    rstream.pipe(gzip).pipe(wstream).on('finish',function() {
+        console.log("Finished Compressing");
+        fs.readFile("./Details_Book.html",function(err,html){
+            if (err){
+                throw err;
+            }
+            response.writeHeader(200,{"Content-Type":"text/html"});
+            response.write(html);
+            response.write("<script type='text/javascript'>alert('Downloaded the zipped file, check in the D://books directory');</script>)");
+            response.end();
+        });
+    });
+}
+
+exports.view_book = function(request,response){
+    var query = url.parse(request.url).query;
+    var ebook = querystring.parse(query)["ebook"];
+    file = fs.createReadStream("./books/"+ebook);
+    file.pipe(response);
+}
+
+exports.createChat = function(request,response){
+    var query = url.parse(request.url).query;
+    var chatmessage = querystring.parse(query)["chatmessage"];
+    var chatname = querystring.parse(query)["chatname"];
+    var client = net.connect({port:1234},function(){
+        console.log('connected to server!');
+        client.write("<B>Name:</B>"+chatname);
+        client.write("<br><B>Message:</B>"+chatmessage);
+    });
+    client.on('data',function(data){
+        message += "<tr stylr='border-bottom:ridge;'><td>"+data.toString()+"</td></tr>";
+        console.log(data.toString());
+        fs.readFile('./Details_Book.html',function(err,html){
+            if(err){
+                throw err;
+            }
+            response.writeHeader(200,{"Content-Type":"text/html"});
+            response.write(html);
+            var chatresponse ="<br><table style='border-collapse:collapse;background-color:#ffb3b3;border:ridge;width:300px;top:100;left:0;position:fixed;'><trstyle='border-bottom:ridge;'><td><h4>Discussion:</h4></td></tr>"+message+"</table>";
+            response.write(chatresponse);
+            response.end();        
+        });
+    });
+    client.on('end',function(){
+        console.log("Disconneted from the server");
+    });
+}

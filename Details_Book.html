@@ -1,0 +1,72 @@
+<html>
+    <head>
+        <title>Book Details</title>
+        <style>
+            .chatwindow{
+                position:fixed;
+                top:0;
+                right:0;
+                height:0;
+                width:200;
+                border:ridge;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script type = "text/javascript">
+            $(function(){
+                $.ajax({
+                    type: "POST",
+                    url : "http://localhost:3000/books",
+                    success: function(data){
+                        var table = document.createElement("table");
+                        table.border = "1";
+                        var books = data;
+                        console.log(books);
+                        books.forEach(function(book){
+                            console.log("Book id is : "+book.isbnNo);
+                            
+                            var row = table.insertRow(0);
+                            var cell1 = row.insertCell(0);
+                            var cell2 = row.insertCell(1);
+
+                            cell1.innerHTML = "<div><a href='http://localhost:3000/books/view?ebook="+book.ebookname+"'><img src="+book.imageUrl+" alt=\"default\" height=\"80%\" width=\"80%\"/></a>" ;
+						    cell2.innerHTML = "<form><div>ISBNNO :"+book.isbnNo+" </div>"+"<div>BookName :"+book.name+"</div>"+"<div>Cost:"+book.price+"/-</div>"+"<div><a href='http://localhost:3000/books/download?ebook="+book.ebookname+"'>Download the ebook</a></div></form>";
+                        });
+                        $('#result').append(table)
+                    },
+                    error : function(xhr,status,error){
+                        alert("error");
+                    }
+                });
+            });
+        </script>
+    </head>
+
+    <body bgcolor = "#E2C2F6">
+        <center>
+            <h1>Online book Library</h1>
+            <h3>Welcome to book World</h3>
+            <form>                
+                <table>
+                    <tr>
+                        <td>
+                            <div id="result"></div>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </center>
+        <table class="chatwindow" style="background-color:aqua;">
+            <tr><td>Chat with us for queries!!</td></tr>
+            <tr>
+                <td>
+                    <form action="http://localhost:3000/chat">
+                    Name:<input type="text" name="chatname"><br>
+                    Enter the Message:<input type="text" name="chatmessage"><br>
+                    <input type="submit" value="send">
+                    </form>
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>
